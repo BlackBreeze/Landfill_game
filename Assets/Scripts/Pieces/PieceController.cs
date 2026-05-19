@@ -236,13 +236,13 @@ public class PieceController : MonoBehaviour
 
     void LockPiece()
     {
+        var lockedCells = _cells;
         ErasePiece();
-        _board.LockCells(_cells);
+        _board.LockCells(lockedCells);
         _renderer.RefreshAll(_board);
-        OnPieceLocked?.Invoke(_cells);
         _cells      = null;
         _ghostCells = null;
-        enabled = false; // RunManager re-enables after clears
+        OnPieceLocked?.Invoke(lockedCells); // RunManager controls enabled state from here
     }
 
     // --- Cell calculation ---
