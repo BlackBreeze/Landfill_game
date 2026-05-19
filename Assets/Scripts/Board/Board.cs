@@ -60,13 +60,13 @@ public class Board
 
     // --- Line logic ---
 
-    // A line is full when every cell is occupied (CellCompactedJunk blocks completion)
+    // A line is full when no cell is empty. CompactedJunk counts as filled so TryClearLine
+    // can crack it on the first clear attempt and actually remove it on the second.
     public bool IsLineFull(int row)
     {
         for (int col = 0; col < Width; col++)
         {
-            int v = _cells[col, row];
-            if (v == GameConstants.CellEmpty || v == GameConstants.CellCompactedJunk)
+            if (_cells[col, row] == GameConstants.CellEmpty)
                 return false;
         }
         return true;
