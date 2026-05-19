@@ -1,10 +1,11 @@
 public static class GameConstants
 {
     // Board
-    public const int BoardWidth       = 10;
-    public const int BoardHeight      = 20;   // visible rows
-    public const int SpawnRowCount    = 10;   // empty rows at top before pre-fill starts
-    public const float InitialFillDensity  = 0.70f; // % of cells that spawn as debris
+    public const int BoardWidth            = 10;
+    public const int BoardDisplayRows      = 20;  // rows visible at a time
+    public const int BoardHeight           = 60;  // total board data rows (buffer for infinite scroll)
+    public const int BoardInitialViewBottom = 30; // board row at the bottom of the view on start
+    public const float InitialFillDensity  = 0.70f; // % of cells filled with debris
 
     // Timing
     public const float DiveTimerDefault   = 90f;

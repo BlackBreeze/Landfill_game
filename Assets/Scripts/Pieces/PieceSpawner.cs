@@ -6,11 +6,9 @@ public class PieceSpawner : MonoBehaviour
 {
     public const int PreviewCount = 3;
 
-    // Spawn pivot: center-ish of board, near the top
-    static readonly Vector2Int SpawnPivot = new Vector2Int(
-        GameConstants.BoardWidth / 2,
-        GameConstants.BoardHeight - 2
-    );
+    int _spawnRow = GameConstants.BoardInitialViewBottom + GameConstants.BoardDisplayRows - 2;
+
+    public void SetSpawnRow(int row) => _spawnRow = row;
 
     readonly Queue<TetrominoType> _queue = new Queue<TetrominoType>();
     readonly List<TetrominoType>  _bag   = new List<TetrominoType>(7);
@@ -30,7 +28,7 @@ public class PieceSpawner : MonoBehaviour
             FillBag();
 
         var type = _queue.Dequeue();
-        return (type, SpawnPivot);
+        return (type, new Vector2Int(GameConstants.BoardWidth / 2, _spawnRow));
     }
 
     // Peek at the upcoming pieces without consuming them

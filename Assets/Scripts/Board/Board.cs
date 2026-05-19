@@ -15,11 +15,14 @@ public class Board
         _rng   = seed < 0 ? new System.Random() : new System.Random(seed);
     }
 
-    // Fill the board from row 0 up to (Height - SpawnRowCount - 1)
+    // Fill rows 0 through the midpoint of the initial camera view.
+    // Everything below the initial view (rows 0..viewBottom-1) is dense landfill
+    // that gets revealed as the camera scrolls down.
     public void GenerateFill()
     {
         Array.Clear(_cells, 0, _cells.Length);
-        int topFillRow = Height - GameConstants.SpawnRowCount - 1;
+        int topFillRow = GameConstants.BoardInitialViewBottom
+                       + GameConstants.BoardDisplayRows / 2 - 1; // row 39
 
         for (int row = 0; row <= topFillRow; row++)
         {
@@ -100,14 +103,4 @@ public class Board
         return true;
     }
 
-    // After a real clear: fill the top row with new garbage to simulate descending.
-    // TryClearLine already collapsed the cleared row upward, leaving row Height-1 empty.
-    public void InsertTopRow(int currentDepth)
-    {
-        float density = Mathf.Clamp(0.60f + currentDepth * 0.002f, 0.60f, 0.82f);
-        for (int col = 0; col < Width; col++)
-            _cells[col, Height - 1] = _rng.NextDouble() < density
-                ? GameConstants.CellDebris
-                : GameConstants.CellEmpty;
-    }
 }

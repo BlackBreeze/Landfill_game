@@ -28,6 +28,11 @@ public class RunManager : MonoBehaviour
     int   _depth;
     int   _scrap;
 
+    // Camera scroll — tracks which board row sits at the bottom of the visible window
+    int   _viewBottomRow  = GameConstants.BoardInitialViewBottom;
+    float _cameraTargetY;
+    const float CameraScrollSpeed = 6f;
+
     enum RunState { Spawning, Playing, Clearing, RunEnd }
     RunState _state;
 
@@ -35,6 +40,13 @@ public class RunManager : MonoBehaviour
     {
         // Hide run-end panel
         if (runEndPanel != null) runEndPanel.SetActive(false);
+
+        // Position camera over the initial view window
+        _cameraTargetY = ViewCenterY();
+        var cam = Camera.main;
+        if (cam != null)
+            cam.transform.position = new Vector3(
+                (GameConstants.BoardWidth - 1) * 0.5f, _cameraTargetY, -10f);
 
         // Build board data
         _board = new Board();
@@ -70,9 +82,20 @@ public class RunManager : MonoBehaviour
         SpawnNext();
     }
 
+    void Update()
+    {
+        var cam = Camera.main;
+        if (cam == null) return;
+        var pos = cam.transform.position;
+        pos.y = Mathf.Lerp(pos.y, _cameraTargetY, CameraScrollSpeed * Time.deltaTime);
+        cam.transform.position = pos;
+    }
+
     void SpawnNext()
     {
         _state = RunState.Spawning;
+        pieceSpawner.SetSpawnRow(_viewBottomRow + GameConstants.BoardDisplayRows - 2);
+        lineClearSystem.SetViewBottom(_viewBottomRow);
         var (type, pivot) = pieceSpawner.Next();
 
         // Lockout check: if spawn position is occupied, run ends
@@ -109,8 +132,10 @@ public class RunManager : MonoBehaviour
     {
         if (linesCleared > 0)
         {
-            _depth += linesCleared;
-            _scrap += scrapEarned;
+            _depth         += linesCleared;
+            _scrap         += scrapEarned;
+            _viewBottomRow -= linesCleared; // scroll camera deeper
+            _cameraTargetY  = ViewCenterY();
 
             var gm = GameManager.Instance;
             float milestoneBonus = gm != null ? gm.GetMilestoneBonus() : GameConstants.MilestoneTimeBonus;
@@ -158,6 +183,9 @@ public class RunManager : MonoBehaviour
         if (depthLabel != null) depthLabel.text = $"Depth  {_depth}";
         if (scrapLabel != null) scrapLabel.text = $"Scrap  {_scrap}";
     }
+
+    float ViewCenterY()
+        => _viewBottomRow + GameConstants.BoardDisplayRows / 2f;
 
     // Editor helper — instant restart without going to upgrade screen
     [ContextMenu("Restart Run")]

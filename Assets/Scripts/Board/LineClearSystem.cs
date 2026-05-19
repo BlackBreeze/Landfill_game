@@ -12,6 +12,7 @@ public class LineClearSystem : MonoBehaviour
     Board         _board;
     BoardRenderer _renderer;
     int           _currentDepth;
+    int           _viewBottomRow = GameConstants.BoardInitialViewBottom;
 
     public void Init(Board board, BoardRenderer renderer)
     {
@@ -19,16 +20,18 @@ public class LineClearSystem : MonoBehaviour
         _renderer = renderer;
     }
 
-    public void SetDepth(int depth) => _currentDepth = depth;
+    public void SetDepth(int depth)         => _currentDepth  = depth;
+    public void SetViewBottom(int row)      => _viewBottomRow = row;
 
     // Entry point — called by RunManager after each piece lock
     public void ProcessClears() => StartCoroutine(DoClearRoutine());
 
     IEnumerator DoClearRoutine()
     {
-        // Find all full rows (bottom to top to handle multi-line shifts correctly)
+        // Scan only the visible window — rows outside it are pre-generated or already gone
         var fullRows = new List<int>();
-        for (int row = 0; row < GameConstants.BoardHeight; row++)
+        int scanTop = _viewBottomRow + GameConstants.BoardDisplayRows;
+        for (int row = _viewBottomRow; row < scanTop; row++)
             if (_board.IsLineFull(row))
                 fullRows.Add(row);
 
@@ -78,10 +81,7 @@ public class LineClearSystem : MonoBehaviour
 
             bool actuallyCleared = _board.TryClearLine(clearRow);
             if (actuallyCleared)
-            {
                 linesCleared++;
-                _board.InsertTopRow(_currentDepth + linesCleared);
-            }
             // If it just cracked compacted junk, that's fine — it'll clear next time
         }
 
