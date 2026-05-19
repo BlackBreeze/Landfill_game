@@ -3,8 +3,8 @@ public static class GameConstants
     // Board
     public const int BoardWidth       = 10;
     public const int BoardHeight      = 20;   // visible rows
-    public const int SpawnRowCount    = 4;    // empty rows at top before pre-fill starts
-    public const float InitialFillDensity  = 0.50f; // % of cells that spawn as debris
+    public const int SpawnRowCount    = 10;   // empty rows at top before pre-fill starts
+    public const float InitialFillDensity  = 0.70f; // % of cells that spawn as debris
 
     // Timing
     public const float DiveTimerDefault   = 90f;
