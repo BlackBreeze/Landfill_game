@@ -160,7 +160,7 @@ public class PieceController : MonoBehaviour
         if (!_isGrounded) return;
 
         // If the piece can now move down again (e.g. board changed), cancel grounded
-        if (CanPlace(_pivot, _rotation))
+        if (CanDrop(_pivot, _rotation))
         {
             _isGrounded = false;
             return;
