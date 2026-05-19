@@ -80,7 +80,7 @@ public class LineClearSystem : MonoBehaviour
             if (actuallyCleared)
             {
                 linesCleared++;
-                _board.InsertBottomRow(_currentDepth + linesCleared);
+                _board.InsertTopRow(_currentDepth + linesCleared);
             }
             // If it just cracked compacted junk, that's fine — it'll clear next time
         }

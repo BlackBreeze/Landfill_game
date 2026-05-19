@@ -100,17 +100,13 @@ public class Board
         return true;
     }
 
-    // After a real clear: shift all rows up 1 and generate a new garbage row at the bottom.
-    // This is the "descend deeper" mechanic — new landfill material appears from below.
-    public void InsertBottomRow(int currentDepth)
+    // After a real clear: fill the top row with new garbage to simulate descending.
+    // TryClearLine already collapsed the cleared row upward, leaving row Height-1 empty.
+    public void InsertTopRow(int currentDepth)
     {
-        for (int r = Height - 1; r > 0; r--)
-            for (int col = 0; col < Width; col++)
-                _cells[col, r] = _cells[col, r - 1];
-
         float density = Mathf.Clamp(0.60f + currentDepth * 0.002f, 0.60f, 0.82f);
         for (int col = 0; col < Width; col++)
-            _cells[col, 0] = _rng.NextDouble() < density
+            _cells[col, Height - 1] = _rng.NextDouble() < density
                 ? GameConstants.CellDebris
                 : GameConstants.CellEmpty;
     }
