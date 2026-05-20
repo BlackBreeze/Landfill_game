@@ -238,13 +238,36 @@ public class PieceController : MonoBehaviour
 
     void LockPiece()
     {
-        var carvedCells = _cells;
+        var pieceCells  = _cells;
+        bool sticks     = IsAboveHardRock(pieceCells); // hard rock below → stick; soft terrain → carve
+
         ErasePiece();
-        _board.CarveShape(carvedCells);     // carve: each column punches as deep as it is tall
+
+        if (sticks)
+            _board.LockCells(pieceCells);   // piece becomes debris — player builds up to fill the row
+        else
+            _board.CarveShape(pieceCells);  // piece digs — removes terrain in its shape
+
         _renderer.RefreshAll(_board);
         _cells      = null;
         _ghostCells = null;
-        OnPieceLocked?.Invoke(carvedCells); // RunManager controls enabled state from here
+        OnPieceLocked?.Invoke(pieceCells);
+    }
+
+    // True when any cell directly below the piece is hard rock (CompactedJunk or CompactedHit).
+    // This means the piece is resting on a hard layer and should stick, not carve.
+    bool IsAboveHardRock(Vector2Int[] cells)
+    {
+        foreach (var c in cells)
+        {
+            int belowRow = c.y - 1;
+            if (!_board.InBounds(c.x, belowRow)) continue;
+            int cell = _board.GetCell(c.x, belowRow);
+            if (cell == GameConstants.CellCompactedJunk ||
+                cell == GameConstants.CellCompactedHit)
+                return true;
+        }
+        return false;
     }
 
     // --- Cell calculation ---
