@@ -130,8 +130,8 @@ public class PieceController : MonoBehaviour
         if (!Input.GetKey(KeyCode.DownArrow)) return;
         if (TryMove(0, -1))
         {
-            _gravityTimer = _gravityInterval; // reset gravity on manual drop
-            _isGrounded   = false;
+            _gravityTimer = _gravityInterval;
+            _isGrounded   = IsOnTerrain(); // land immediately if we just entered terrain
         }
     }
 
@@ -150,7 +150,8 @@ public class PieceController : MonoBehaviour
         if (_gravityTimer <= 0f)
         {
             _gravityTimer = _gravityInterval;
-            if (!TryMove(0, -1))
+            // Ground if blocked below (hard rock / floor) OR if we just entered terrain
+            if (!TryMove(0, -1) || IsOnTerrain())
                 _isGrounded = true;
         }
     }
@@ -159,8 +160,8 @@ public class PieceController : MonoBehaviour
     {
         if (!_isGrounded) return;
 
-        // If the piece can now move down again (e.g. board changed), cancel grounded
-        if (CanDrop(_pivot, _rotation))
+        // Cancel grounded only if we can drop further AND aren't sitting in terrain
+        if (CanDrop(_pivot, _rotation) && !IsOnTerrain())
         {
             _isGrounded = false;
             return;
@@ -261,7 +262,9 @@ public class PieceController : MonoBehaviour
     Vector2Int[] CalcGhost()
     {
         var ghostPivot = _pivot;
-        while (CanPlace(new Vector2Int(ghostPivot.x, ghostPivot.y - 1), _rotation))
+        // Stop descending when we hit hard rock/floor OR when the next step enters terrain
+        while (CanPlace(new Vector2Int(ghostPivot.x, ghostPivot.y - 1), _rotation)
+               && !IsPivotOnTerrain(ghostPivot, _rotation))
             ghostPivot.y--;
 
         var offsets = TetrominoData.GetCells(_type, _rotation);
@@ -269,6 +272,29 @@ public class PieceController : MonoBehaviour
         for (int i = 0; i < 4; i++)
             ghost[i] = new Vector2Int(ghostPivot.x + offsets[i].x, ghostPivot.y + offsets[i].y);
         return ghost;
+    }
+
+    // True if any cell of the piece currently overlaps a terrain cell
+    bool IsOnTerrain()
+    {
+        if (_cells == null) return false;
+        foreach (var c in _cells)
+            if (_board.InBounds(c.x, c.y) && _board.GetCell(c.x, c.y) != GameConstants.CellEmpty)
+                return true;
+        return false;
+    }
+
+    // Ghost helper — checks a hypothetical pivot position for terrain contact
+    bool IsPivotOnTerrain(Vector2Int pivot, int rot)
+    {
+        foreach (var offset in TetrominoData.GetCells(_type, rot))
+        {
+            int col = pivot.x + offset.x;
+            int row = pivot.y + offset.y;
+            if (_board.InBounds(col, row) && _board.GetCell(col, row) != GameConstants.CellEmpty)
+                return true;
+        }
+        return false;
     }
 
     // --- Rendering ---
