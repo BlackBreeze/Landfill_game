@@ -50,11 +50,26 @@ public class Board
     public bool InBounds(int col, int row)
         => col >= 0 && col < Width && row >= 0 && row < Height;
 
-    // Treats out-of-bounds and any non-empty cell as occupied
+    // Treats out-of-bounds and any non-empty cell as occupied (used by non-piece systems)
     public bool IsOccupied(int col, int row)
         => !InBounds(col, row) || _cells[col, row] != GameConstants.CellEmpty;
 
-    // Lock piece cells onto the board as debris
+    // Piece movement rule: only hard rock (CompactedJunk) and out-of-bounds block a piece.
+    // Soft terrain (Debris, CompactedHit) is passable — pieces dig through it.
+    public bool CanPieceEnter(int col, int row)
+    {
+        if (!InBounds(col, row)) return false;
+        return _cells[col, row] != GameConstants.CellCompactedJunk;
+    }
+
+    // Carve piece cells into the board — removes whatever terrain was there.
+    public void CarveCells(Vector2Int[] cells)
+    {
+        foreach (var c in cells)
+            SetCell(c.x, c.y, GameConstants.CellEmpty);
+    }
+
+    // Legacy: lock piece cells as debris (kept for reference, no longer used)
     public void LockCells(Vector2Int[] cells)
     {
         foreach (var c in cells)

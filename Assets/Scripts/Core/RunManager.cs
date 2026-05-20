@@ -98,13 +98,13 @@ public class RunManager : MonoBehaviour
         lineClearSystem.SetViewBottom(_viewBottomRow);
         var (type, pivot) = pieceSpawner.Next();
 
-        // Lockout check: if spawn position is occupied, run ends
+        // Lockout check: hard rock at spawn = run ends. Soft terrain is fine — piece will carve it.
         var cells = TetrominoData.GetCells(type, 0);
         foreach (var offset in cells)
         {
             int col = pivot.x + offset.x;
             int row = pivot.y + offset.y;
-            if (_board.IsOccupied(col, row))
+            if (!_board.CanPieceEnter(col, row))
             {
                 EndRun();
                 return;

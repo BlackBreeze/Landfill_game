@@ -215,14 +215,15 @@ public class PieceController : MonoBehaviour
         }
     }
 
-    // True if piece at pivot+rot doesn't overlap occupied board cells
+    // True if piece at pivot+rot can exist there — only hard rock and board edges block it.
+    // Soft terrain is passable: pieces fall through soil and carve it on landing.
     bool CanPlace(Vector2Int pivot, int rot)
     {
         foreach (var offset in TetrominoData.GetCells(_type, rot))
         {
             int col = pivot.x + offset.x;
             int row = pivot.y + offset.y;
-            if (_board.IsOccupied(col, row)) return false;
+            if (!_board.CanPieceEnter(col, row)) return false;
         }
         return true;
     }
@@ -236,13 +237,13 @@ public class PieceController : MonoBehaviour
 
     void LockPiece()
     {
-        var lockedCells = _cells;
+        var carvedCells = _cells;
         ErasePiece();
-        _board.LockCells(lockedCells);
+        _board.CarveCells(carvedCells);     // carve the piece's shape out of the terrain
         _renderer.RefreshAll(_board);
         _cells      = null;
         _ghostCells = null;
-        OnPieceLocked?.Invoke(lockedCells); // RunManager controls enabled state from here
+        OnPieceLocked?.Invoke(carvedCells); // RunManager controls enabled state from here
     }
 
     // --- Cell calculation ---
