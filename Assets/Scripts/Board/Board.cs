@@ -69,6 +69,35 @@ public class Board
             SetCell(c.x, c.y, GameConstants.CellEmpty);
     }
 
+    // Shape-aware carve: for each column in the piece, carve downward from the lowest
+    // piece cell by as many rows as that column is tall. A 4-tall column punches 4 rows
+    // deep; a 1-tall column bites 1 row. Stops at hard rock or board edge.
+    public void CarveShape(Vector2Int[] pieceCells)
+    {
+        for (int col = 0; col < Width; col++)
+        {
+            int bottomRow = int.MaxValue;
+            int colHeight = 0;
+
+            foreach (var c in pieceCells)
+            {
+                if (c.x != col) continue;
+                colHeight++;
+                if (c.y < bottomRow) bottomRow = c.y;
+            }
+
+            if (colHeight == 0) continue;
+
+            for (int i = 0; i < colHeight; i++)
+            {
+                int row = bottomRow - i;
+                if (!InBounds(col, row)) break;
+                if (_cells[col, row] == GameConstants.CellCompactedJunk) break; // hard rock stops the dig
+                _cells[col, row] = GameConstants.CellEmpty;
+            }
+        }
+    }
+
     // Legacy: lock piece cells as debris (kept for reference, no longer used)
     public void LockCells(Vector2Int[] cells)
     {

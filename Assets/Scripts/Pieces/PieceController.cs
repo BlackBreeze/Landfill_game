@@ -240,7 +240,7 @@ public class PieceController : MonoBehaviour
     {
         var carvedCells = _cells;
         ErasePiece();
-        _board.CarveCells(carvedCells);     // carve the piece's shape out of the terrain
+        _board.CarveShape(carvedCells);     // carve: each column punches as deep as it is tall
         _renderer.RefreshAll(_board);
         _cells      = null;
         _ghostCells = null;
